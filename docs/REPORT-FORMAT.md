@@ -1,20 +1,20 @@
-# Report Format
+# Formato del informe de auditoría
 
-## File
+## Archivo generado
 
-The latest exported field report is written to:
+La última exportación se escribe en:
 
-```text
+~~~text
 /ext/apps_data/onyx_flipper_lab/last_audit_report.txt
-```
+~~~
 
-Each export intentionally replaces the previous report.
+Cada exportación sustituye la anterior para reducir la acumulación innecesaria de observaciones.
 
-This design minimizes uncontrolled accumulation of observed field data.
+## Ejemplo del formato real
 
-## Example
+**Los nombres de campos se conservan en inglés porque forman parte del formato que escribe la aplicación. No deben traducirse dentro de los archivos exportados.**
 
-```text
+~~~text
 ONYX FLIPPER LAB - FIELD AUDIT REPORT
 Version: 3.0
 Operator: Fran Gonzas
@@ -46,23 +46,14 @@ nfc_uid_saved=false
 lf_rfid_bytes_saved=false
 
 END OF REPORT
-```
+~~~
 
-## Privacy model
+## Privacidad
 
-The report is a measurement summary, not a credential database.
+El informe resume medidas, **no crea una base de datos de credenciales**. No almacena UID NFC, sectores de aplicación NFC, bytes LF RFID, direcciones/comandos IR, contraseñas generadas ni capturas Sub-GHz reproducibles.
 
-It intentionally excludes:
+## Interpretación de los datos
 
-- NFC UID values;
-- NFC tag application data;
-- LF RFID credential bytes;
-- IR addresses and commands;
-- passwords generated in-app;
-- raw or replayable Sub-GHz captures.
+El RSSI depende del entorno, distancia, orientación de antena, interferencias y configuración del receptor. La diferencia respecto a una referencia es un indicador comparativo: **no demuestra** la identidad de un dispositivo ni un comportamiento malicioso.
 
-## Interpretation
-
-RSSI is environmental and highly dependent on distance, antenna orientation, interference and receiver configuration.
-
-The Sub-GHz baseline delta is a simple comparative indicator and must not be interpreted as proof of device identity or malicious activity.
+© 2026 Fran Gonzas

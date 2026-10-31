@@ -1,185 +1,106 @@
-# ONYX FLIPPER LAB
+# ONYX FLIPPER LAB — v3.0.0
 
-> Defensive field-audit utilities for Flipper Zero.
+**Terminal de auditoría defensiva para Flipper Zero**  
+**Creador: Fran Gonzas · Lenguaje: C · Formato: aplicación externa FAP**
 
-**Fran Gonzas · Software · Systems · Security**
+## Estado del proyecto
 
----
+| Campo | Estado |
+|---|---|
+| Versión | **3.0.0 — final** |
+| Plataforma | Flipper Zero |
+| Compilación | uFBT y SDK oficial de Flipper |
+| Validación | Compilación superada y versión probada en hardware físico, según documentación del proyecto |
+| Mantenimiento | Correcciones de compatibilidad, seguridad y documentación |
+| Uso | Auditorías autorizadas, observación pasiva y generación de informes |
 
-## Status
+> **Limitación importante:** el proyecto no transmite por Sub-GHz, no reproduce señales, no clona credenciales ni realiza interferencias de radiofrecuencia.
 
-```text
-PROJECT     Onyx Flipper Lab
-PLATFORM    Flipper Zero
-TYPE        External FAP
-LANGUAGE    C
-BUILD       uFBT / official release SDK
-SCOPE       Defensive / authorized / read-only radio
-VERSION     3.0.0 FINAL
-STATUS      TESTED / FINALIZED
-CI          PASSING
-```
+## Funciones de la versión final
 
-## v3.0.0 FINAL — Field Audit Terminal
+La v3 consolida las herramientas en una **sesión de auditoría de campo** que acumula contadores y medidas:
 
-Version 3.0.0 is the **final tested project version**. It turns the app from a set of individual tools into a **session-oriented audit terminal**.
+- Conteo y rango de tensión mínimo/máximo por GPIO.
+- Monitor de RSSI/LQI Sub-GHz en recepción, con referencia configurable y diferencia en directo.
+- Indicador simple de variaciones mayores de ±12 dB respecto al nivel de referencia.
+- Contadores de señales IR y detecciones NFC/LF RFID.
+- Informe resumido de sesión exportable a microSD.
+- Utilidades de contraseñas y hexadecimal basadas en el generador aleatorio del hardware.
 
-New in v3:
+## Módulos
 
-- **session metrics** across GPIO, Sub-GHz, IR, NFC and LF RFID;
-- **GPIO min/max tracking** across the full app session;
-- **Sub-GHz baseline mode** — press OK to capture a reference RSSI and view live delta;
-- simple **RF change flagging** when the delta exceeds ±12 dB;
-- **Session Report** screen with aggregate counters;
-- **privacy-safe report export** to the microSD application-data directory;
-- report intentionally excludes NFC UIDs, LF RFID bytes and IR command values.
-
-The generated report is stored as:
-
-```text
-/ext/apps_data/onyx_flipper_lab/last_audit_report.txt
-```
-
----
-
-## Audit modules
-
-| Module | Capability | Active write / transmit |
+| Módulo | Información | Límite |
 |---|---|---|
-| **GPIO Auditor** | ADC voltage, raw value, session min/max, sample count | No GPIO output |
-| **Sub-GHz RSSI** | RX-only RSSI/LQI, peak, baseline and delta | No TX |
-| **Bluetooth Audit** | Local BLE core/link posture and RSSI | No profile changes |
-| **IR Inspector** | Receive/decode protocol, address, command, raw timing count | No IR TX |
-| **NFC Detector** | Protocol-family detection through official scanner API | No emulation/write |
-| **LF RFID Reader** | ASK/PSK protocol identification and bounded in-memory preview | No write/emulation |
-| **Session Report** | Aggregate counters and sanitized export | Writes report only |
-| **Password Generator** | Hardware-RNG password generation | Local only |
-| **Random HEX** | 8 hardware-RNG bytes | Local only |
+| **Auditor GPIO** | ADC, tensión, muestras y valores mínimo/máximo | No configura salidas GPIO |
+| **Sub-GHz RSSI** | RSSI/LQI, máximo, línea base y diferencia | Solo recepción, sin transmisión |
+| **Bluetooth** | Estado local del controlador y enlace | No cambia perfiles |
+| **Inspección IR** | Recepción, decodificación y tiempos | No transmite infrarrojos |
+| **Detector NFC** | Familia de protocolo mediante API oficial | No emula ni escribe |
+| **Lector LF RFID** | Tipo ASK/PSK y vista temporal de datos | No escribe ni emula |
+| **Informe de sesión** | Contadores y medidas agregadas | Solo escribe el informe |
+| **Contraseñas aleatorias** | Caracteres mediante RNG hardware | Ejecución local |
+| **HEX aleatorio** | Ocho bytes mediante RNG hardware | Ejecución local |
 
----
+## Controles físicos
 
-## Interface
+- **Arriba / Abajo:** navegar por el menú.
+- **Izquierda / Derecha:** cambiar pin GPIO o banda Sub-GHz.
+- **OK en Sub-GHz:** registrar el RSSI actual como referencia.
+- **OK en Informe de sesión:** exportar el resumen.
+- **Atrás:** detener el módulo y volver al menú.
 
-```text
-┌──────────────────────────┐
-│ ONYX AUDIT LAB           │
-├──────────────────────────┤
-│ > GPIO auditor           │
-│   SubGHz RSSI            │
-│   Bluetooth audit        │
-│   IR inspector           │
-│   NFC detector           │
-│   LF RFID reader         │
-│   Session report         │
-│   Password generator     │
-│   Random HEX             │
-│   Security tips          │
-│   About                  │
-└──────────────────────────┘
-```
+## Privacidad de los informes
 
-Controls:
+La ruta del último informe es:
 
-- **UP / DOWN** — navigate.
-- **LEFT / RIGHT** — switch GPIO pin or Sub-GHz band.
-- **OK in Sub-GHz** — capture current RSSI as baseline.
-- **OK in Session Report** — export a sanitized audit report.
-- **BACK** — stop the current module and return safely to the menu.
+~~~text
+/ext/apps_data/onyx_flipper_lab/last_audit_report.txt
+~~~
 
----
+Solo se almacenan métricas agregadas y contadores. **No se guardan** UID de NFC, datos LF RFID, comandos IR, contraseñas generadas ni muestras RF reutilizables. Cada exportación sustituye al informe anterior.
 
-## Privacy-safe reporting
+[Especificación del informe](docs/REPORT-FORMAT.md) · [Política de seguridad](SECURITY.md)
 
-The report contains:
+## Compilación e instalación
 
-- session start/report timestamps;
-- GPIO sample count and voltage range;
-- Sub-GHz sample count and RSSI range;
-- IR signal count;
-- NFC detection-event count;
-- LF RFID detection-event count.
+Necesitas Flipper Zero, microSD, conexión USB y Python compatible con uFBT.
 
-The report deliberately does **not** persist:
+**macOS/Linux:**
 
-- NFC UIDs;
-- NFC application memory;
-- LF RFID payload bytes;
-- IR command/address values;
-- passwords generated by the app;
-- replayable RF data.
-
-See [Report Format](./docs/REPORT-FORMAT.md).
-
----
-
-## Build
-
-Install uFBT:
-
-```bash
+~~~bash
 python3 -m pip install --upgrade ufbt
-```
-
-Build:
-
-```bash
+git clone https://github.com/frangonzas/Onyx-FlipperZero-Lab.git
+cd Onyx-FlipperZero-Lab
 ufbt
-```
+~~~
 
-Build, upload and launch over USB:
+**Windows PowerShell:**
 
-```bash
+~~~powershell
+py -m pip install --upgrade ufbt
+git clone https://github.com/frangonzas/Onyx-FlipperZero-Lab.git
+cd Onyx-FlipperZero-Lab
+ufbt
+~~~
+
+Para compilar, transferir y ejecutar en un dispositivo conectado:
+
+~~~bash
 ufbt launch
-```
+~~~
 
-GitHub Actions compiles the project against the official Flipper release SDK and publishes the generated `.fap` as an artifact.
+GitHub Actions compila con el SDK oficial y ofrece el archivo \`.fap\` como artefacto, cuando la ejecución termina correctamente.
 
----
+[Manual de compilación](docs/BUILD.md) · [Arquitectura](docs/ARCHITECTURE.md) · [Módulos de auditoría](docs/AUDIT-MODULES.md)
 
-## Bluetooth note
+## Nota técnica sobre Bluetooth
 
-The public external-app SDK exposes useful Bluetooth HAL/status functions, but not a stable generic BLE advertisement scanner for FAPs.
+La API pública para aplicaciones externas de Flipper ofrece información útil del estado Bluetooth, pero **no proporciona un escáner genérico estable de anuncios BLE** para todas las FAP. El módulo utiliza las funciones públicas disponibles sin depender de componentes internos inestables.
 
-The project therefore stays on public/stable APIs rather than silently depending on internal BLE implementation details.
+## Política de uso
 
----
+Solo para dispositivos, sistemas y radiofrecuencias propios o con autorización expresa. El indicador de variación de señal **no prueba** la identidad de un emisor ni la existencia de un ataque.
 
-## Security boundaries
+[Estado final del proyecto](FINAL_STATUS.md) · [Historial](CHANGELOG.md) · [Seguridad](SECURITY.md)
 
-```text
-RX_FIRST
-READ_ONLY_CREDENTIAL_MEDIA
-NO_SUBGHZ_TX
-NO_IR_TX
-NO_NFC_EMULATION
-NO_RFID_WRITE
-NO_REPLAY
-NO_BRUTE_FORCE
-NO_JAMMING
-NO_HIDDEN_PERSISTENCE
-PRIVACY_SAFE_REPORTING
-AUTHORIZED_SYSTEMS_ONLY
-```
-
-See:
-
-- [Audit modules](./docs/AUDIT-MODULES.md)
-- [Report format](./docs/REPORT-FORMAT.md)
-- [Architecture](./docs/ARCHITECTURE.md)
-- [Build guide](./docs/BUILD.md)
-- [Security policy](./SECURITY.md)
-- [Changelog](./CHANGELOG.md)
-
----
-
-## Ethical scope
-
-Use hardware-security and radio-analysis tools only on devices, systems and infrastructure that you own or are explicitly authorized to assess.
-
-### Project state
-
-**TESTED · FINALIZED · MAINTENANCE ONLY**
-
-The project has been compiled successfully against the official Flipper release SDK and confirmed installed on physical Flipper Zero hardware.
-
-© 2026 Fran Gonzas
+**© 2026 Fran Gonzas · v3.0.0 final · Mantenimiento.**

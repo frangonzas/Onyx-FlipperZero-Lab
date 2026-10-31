@@ -1,73 +1,63 @@
-# Build and Install
+# Compilación e instalación
 
-## Requirements
+## Requisitos
 
-- Flipper Zero
-- USB cable
-- Python 3.8 or newer for uFBT bootstrap
-- microSD card installed in the Flipper
-- uFBT
+Flipper Zero con tarjeta microSD, cable USB, Python 3.8 o superior para instalar uFBT y el entorno **uFBT**.
 
-## Install uFBT
+## Instalar uFBT
 
-macOS / Linux:
+**macOS/Linux:**
 
-```bash
+~~~bash
 python3 -m pip install --upgrade ufbt
-```
+~~~
 
-Windows:
+**Windows:**
 
-```powershell
+~~~powershell
 py -m pip install --upgrade ufbt
-```
+~~~
 
-## Build
+## Obtener y compilar el proyecto
 
-Clone the repository and enter it:
-
-```bash
-git clone https://github.com/frangonzas/Onyx-Flipper-Lab.git
-cd Onyx-Flipper-Lab
+~~~bash
+git clone https://github.com/frangonzas/Onyx-FlipperZero-Lab.git
+cd Onyx-FlipperZero-Lab
 ufbt
-```
+~~~
 
-A successful build places the FAP in `dist/`.
+Cuando la compilación termina correctamente, la FAP se coloca en \`dist/\`.
 
-## Run directly on a connected Flipper
+## Ejecutar en Flipper conectado
 
-```bash
+~~~bash
 ufbt launch
-```
+~~~
 
-This compiles the project, transfers the FAP over USB and launches it.
+El comando compila, transfiere el archivo por USB y abre la aplicación.
 
-## SDK compatibility
+## Compatibilidad con el SDK
 
-uFBT downloads an SDK for the selected firmware channel.
+uFBT obtiene un SDK del canal de firmware elegido. Si el dispositivo informa de incompatibilidad de API/SDK, actualiza el SDK local o compila contra la misma familia de firmware instalada.
 
-If the FAP reports an SDK/API mismatch, update the local SDK or build against the firmware family installed on your device.
+## Transferencia manual
 
-## Manual transfer
+Puedes copiar el archivo FAP desde el ordenador a la microSD utilizando el gestor de archivos de qFlipper. La carpeta base de aplicaciones es:
 
-A built FAP can also be copied to the Flipper microSD card using qFlipper's file manager.
-
-Place it under an appropriate directory inside:
-
-```text
+~~~text
 /ext/apps/
-```
+~~~
 
-The exact menu category is defined by `fap_category` in `application.fam`.
+La categoría específica se establece mediante \`fap_category\` en \`application.fam\`.
 
-## Logs
+## Registros técnicos
 
-The application writes basic lifecycle messages through Furi logging.
+La aplicación utiliza los mensajes de ciclo de vida de Furi. Con el dispositivo conectado:
 
-With the device connected:
-
-```bash
+~~~bash
 ufbt cli
-```
+~~~
 
-Then enable/view the desired log level from the Flipper CLI.
+Selecciona el nivel de registro pertinente desde la consola de Flipper. No publiques registros con datos sensibles.
+
+© 2026 Fran Gonzas

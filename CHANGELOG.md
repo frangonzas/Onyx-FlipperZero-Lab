@@ -1,51 +1,37 @@
-# Changelog
+# Historial de cambios
 
-## 3.0.0 — Field Audit Terminal · FINAL
+## 3.0.0 — Terminal de auditoría de campo · VERSIÓN FINAL
 
-### Final validation
+### Validación
 
-- compiled successfully with the official Flipper release SDK;
-- installed and accepted as tested on physical Flipper Zero hardware;
-- project status set to FINAL / MAINTENANCE ONLY;
-- no further feature development planned unless the project is reopened.
+- Compilación con el SDK oficial estable de Flipper.
+- Instalación y pruebas documentadas en Flipper Zero físico.
+- Estado del proyecto: **FINALIZADO / SOLO MANTENIMIENTO**.
 
-### Added
+### Funciones incorporadas
 
-- session-wide GPIO sample count;
-- GPIO minimum/maximum voltage tracking;
-- session-wide Sub-GHz RSSI min/max tracking;
-- operator-defined Sub-GHz RSSI baseline;
-- live RSSI delta and simple ±12 dB change indicator;
-- session-wide IR signal counter;
-- session-wide NFC detection-event counter;
-- session-wide LF RFID detection-event counter;
-- Session Report screen;
-- privacy-safe microSD report export;
-- report format documentation.
+- Contador de muestras GPIO por sesión.
+- Valores mínimo y máximo de tensión GPIO.
+- RSSI mínimo/máximo de Sub-GHz por sesión.
+- Referencia RSSI Sub-GHz fijada por el operador.
+- Diferencia instantánea de RSSI y aviso simple por variación de ±12 dB.
+- Contadores de señales IR, detecciones NFC y detecciones LF RFID.
+- Pantalla de informe de sesión.
+- Exportación de informe respetuoso con la privacidad a microSD.
+- Documentación del formato de informe.
 
-### Changed
+### Cambios internos y privacidad
 
-- application version moved to 3.0;
-- stack allocation increased to support expanded field-session workflow;
-- documentation now describes persistence and privacy explicitly.
+- Versión de aplicación actualizada a 3.0.
+- Mayor reserva de pila para la sesión ampliada.
+- Documentación explícita del almacenamiento.
+- Informe sin credenciales, UID NFC ni comandos IR.
+- Módulos de radio y credenciales limitados a lectura o recepción.
 
-### Security
+## 2.0.0 — Herramientas de auditoría de hardware
 
-- exported report excludes credential payloads, NFC UIDs and IR command values;
-- radio and credential modules remain read-only / receive-only.
+Auditor GPIO ADC, monitor Sub-GHz RSSI/LQI en RX, estado Bluetooth, inspección IR, detector NFC y lector LF RFID.
 
-## 2.0.0 — Hardware Audit Suite
+## 1.0.0 — Primera versión
 
-- GPIO ADC auditor;
-- Sub-GHz RSSI/LQI RX monitor;
-- Bluetooth local posture view;
-- IR receive inspector;
-- NFC protocol detector;
-- LF RFID read inspector.
-
-## 1.0.0 — Initial Release
-
-- hardware-RNG password generator;
-- random HEX generator;
-- security guidance;
-- basic Flipper FAP structure and CI.
+Generador de contraseñas con RNG de hardware, generador HEX aleatorio, consejos de seguridad, estructura inicial FAP y CI.

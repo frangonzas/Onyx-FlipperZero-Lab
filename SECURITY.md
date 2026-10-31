@@ -1,60 +1,36 @@
-# Security Policy
+# Política de seguridad
 
-## Scope
+## Alcance
 
-Security reports concerning Onyx Flipper Lab are welcome.
+Se aceptan informes sobre problemas de seguridad de **Onyx Flipper Lab**. El proyecto está destinado a educación, ingeniería defensiva y auditorías explícitamente autorizadas de hardware.
 
-This project is intended for defensive engineering, education and explicitly authorized hardware assessment.
+## Comunicación responsable
 
-## Responsible disclosure
+Evita publicar detalles de explotación antes de que puedan evaluarse y corregirse. Un informe útil debe incluir versión/commit, pasos reproducibles, impacto previsto, demostración no destructiva con equipos autorizados y posibles medidas.
 
-Please avoid publishing sensitive exploit details before remediation can reasonably be assessed.
+No publiques contraseñas, tokens, claves privadas ni datos personales.
 
-A useful report should include:
+## Límites operativos de la v3
 
-1. affected version or commit;
-2. reproducible steps;
-3. expected impact;
-4. non-destructive proof using owned or authorized hardware;
-5. suggested mitigation, if known.
+Los módulos excluyen expresamente:
 
-Never include real credentials, private keys, tokens or personal data in a public issue.
+- Transmisión o reproducción Sub-GHz.
+- Transmisión infrarroja.
+- Emulación o escritura NFC y LF RFID.
+- Fuerza bruta o interferencias.
+- Cambio de perfiles Bluetooth o eliminación de dispositivos vinculados.
+- Persistencia encubierta de identificadores observados.
 
-## v3 operational boundaries
+El módulo GPIO solo utiliza **entrada/ADC**.
 
-The current audit modules intentionally exclude:
+## Conservación de informes
 
-- Sub-GHz transmission or replay;
-- infrared transmission;
-- NFC emulation or write operations;
-- LF-RFID write/emulation;
-- brute force;
-- jamming/interference;
-- Bluetooth profile replacement or bonded-device deletion;
-- hidden persistence of observed identifiers.
+La exportación voluntaria guarda un único resumen en el almacenamiento de la aplicación; el nuevo informe sustituye al anterior. Solo contiene contadores y medidas agregadas. Excluye UID NFC, datos LF RFID, direcciones/comandos IR, contraseñas y muestras RF reutilizables.
 
-GPIO auditing is input/ADC-only.
+## Autorización
 
-## Report persistence
+No se permite realizar pruebas sobre sistemas, credenciales, cerraduras, tarjetas, radios, vehículos, alarmas o infraestructuras de terceros sin autorización expresa.
 
-v3 can write one user-triggered field report to app storage.
+Las investigaciones de buena fe y sin perjuicio realizadas sobre equipos propios o autorizados se consideran responsables dentro del alcance del proyecto. Esta política no concede autorización sobre sistemas ajenos.
 
-The report contains aggregate measurements and event counters only.
-
-It deliberately does not save:
-
-- NFC UIDs;
-- LF RFID payload bytes;
-- IR address/command values;
-- generated passwords;
-- replayable RF captures.
-
-The latest report replaces the previous report to limit data accumulation.
-
-## Authorization
-
-This project does not authorize testing third-party systems, credentials, locks, access cards, radios, vehicles, alarms or infrastructure without explicit permission.
-
-## Safe-harbor intent
-
-Good-faith research performed on systems and hardware you own or are explicitly authorized to assess, without disruption or unnecessary data access, is considered responsible research within this project.
+© 2026 Fran Gonzas
