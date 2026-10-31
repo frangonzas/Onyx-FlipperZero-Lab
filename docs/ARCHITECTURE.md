@@ -1,106 +1,67 @@
-# Architecture
+# Arquitectura — Onyx Flipper Lab v3.0.0
 
-## Design goals
+## Objetivos de diseño
 
-Onyx Flipper Lab v2 prioritizes:
+La aplicación prioriza la observación pasiva, las API públicas y estables del SDK de Flipper, el tratamiento de datos con límites, el ciclo de vida explícito de cada módulo y la ausencia de persistencia encubierta. No implementa reproducción de capturas, clonación de credenciales, interferencias ni fuerza bruta.
 
-1. passive observation before active testing;
-2. public/stable Flipper SDK APIs;
-3. bounded in-memory data handling;
-4. explicit module lifecycle and cleanup;
-5. no hidden persistence;
-6. no replay, cloning, jamming or brute-force paths.
+## Modelo de ejecución
 
-## Runtime model
-
-```text
-buttons
+~~~text
+Botones
   │
   ▼
-input callback
+Callback de entrada
   │
   ▼
 FuriMessageQueue
   │
   ▼
-main event loop ─────────► module lifecycle
-  │                           │
-  ▼                           ├── GPIO ADC
-mutex-protected state         ├── Sub-GHz RX
-  │                           ├── Bluetooth HAL
-  ▼                           ├── IR worker
-GUI draw callback             ├── NFC scanner
-                              └── LF RFID worker
-```
+Bucle principal ──────────► Ciclo de vida del módulo
+  │                             │
+  ▼                             ├── GPIO ADC
+Estado con mutex                ├── Sub-GHz RX
+  │                             ├── Bluetooth HAL
+  ▼                             ├── Trabajador IR
+Callback gráfico                ├── Escáner NFC
+                                └── Trabajador LF RFID
+~~~
 
-The input callback only queues events. Hardware start/stop operations are performed by the main application thread.
+El callback de entrada solo encola eventos. **El hilo principal** controla el inicio y la parada de recursos físicos.
 
-## Concurrency
+## Concurrencia
 
-IR, NFC and LF-RFID use firmware workers/callbacks.
+Los módulos IR, NFC y LF RFID utilizan trabajadores y callbacks del firmware. Estos callbacks copian únicamente datos acotados, no dibujan directamente, adquieren el mutex de aplicación antes de modificar el estado compartido y no guardan credenciales. El dibujo de la interfaz también protege las instantáneas con el mismo mutex.
 
-Callbacks:
+## Ciclo de vida del hardware
 
-- copy only bounded results;
-- do not perform UI rendering;
-- take the application mutex before modifying shared state;
-- do not persist credential material.
+Al abrir una pantalla se obtienen únicamente los recursos necesarios. Al pulsar **Atrás**:
 
-The GUI draw callback uses the same mutex for consistent snapshots.
+1. Se vuelve al menú.
+2. Se detiene el recurso de radio, trabajador o escáner correspondiente.
+3. Se libera la memoria y los objetos asociados.
 
-## Module lifecycle
-
-When entering a hardware module, the main thread allocates/acquires only the resources needed by that screen.
-
-When BACK is pressed:
-
-1. the screen is switched back to the menu;
-2. the corresponding worker/scanner/radio resource is stopped;
-3. allocated objects are freed/released.
-
-This prevents hardware resources from remaining active after the user leaves a module.
+Esto evita mantener activos módulos que el operador ya ha cerrado.
 
 ## Sub-GHz
 
-The internal CC1101 is:
-
-1. initialized;
-2. reset;
-3. configured with the official asynchronous OOK preset;
-4. tuned to a selected hardware-supported frequency;
-5. placed into RX;
-6. sampled for RSSI/LQI.
-
-No TX function is called.
+El CC1101 interno se inicializa, restablece, configura con la modulación OOK asíncrona oficial, ajusta a una frecuencia admitida, pasa a **RX** y permite consultar RSSI/LQI. **No se llama a una función de transmisión.**
 
 ## GPIO
 
-The ADC auditor uses firmware GPIO metadata to locate ADC-capable, non-debug pins.
-
-The selected pin is placed into analog input mode, sampled and converted to millivolts. It is never driven high or low.
+Se consultan los metadatos del firmware para seleccionar pines con ADC que no estén reservados para depuración. El pin se configura como entrada analógica, se muestrea y se calcula su tensión en milivoltios. No se fuerza un nivel de salida.
 
 ## Bluetooth
 
-The public FAP API currently provides controller/link posture APIs but no stable generic passive BLE advertisement scan interface. V2 therefore avoids private BLE stack internals.
+La API pública de aplicaciones externas ofrece información del estado del controlador/enlace, pero no un escáner genérico estable de anuncios BLE. El proyecto evita las API privadas del firmware.
 
-## Threat model
+## Modelo de amenazas
 
-Primary assets:
+**Activos:** integridad de Flipper, expectativas de observación pasiva, datos temporales de señales y etiquetas, y valores aleatorios generados.
 
-- integrity of the Flipper runtime;
-- operator expectation that radio modules are passive;
-- transient tag/signal observations;
-- generated random values.
+**Límite de confianza:** las señales y etiquetas externas son entradas no fiables.
 
-Primary trust boundary:
+**Fuera del alcance:** atacar terceros, superar controles de acceso, obtener sectores NFC protegidos, clonar credenciales, reproducir transmisiones y conservar credenciales a largo plazo.
 
-- external signals and tags are untrusted inputs.
+La v3 añade métricas por sesión e informes agregados; consulta [Formato de informe](REPORT-FORMAT.md).
 
-Non-goals:
-
-- attacking third-party systems;
-- bypassing access control;
-- extracting protected NFC application data;
-- cloning credentials;
-- replaying radio captures;
-- long-term credential storage.
+© 2026 Fran Gonzas

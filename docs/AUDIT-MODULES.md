@@ -1,116 +1,66 @@
-# Audit Modules
+# Módulos de auditoría
 
-## GPIO Auditor
+## Auditor GPIO
 
-Purpose: inspect analog voltage on ADC-capable external pins without driving outputs.
+Mide tensión analógica de pines externos compatibles con ADC **sin activar salidas**.
 
-Capabilities:
+- Enumera pines ADC no reservados por el firmware.
+- Configura entrada analógica.
+- Obtiene valor de ADC de 12 bits y tensión calibrada en milivoltios.
+- Cuenta muestras de la sesión.
+- Conserva mínimo y máximo registrados.
 
-- enumerates non-debug ADC-capable GPIO records exposed by the firmware;
-- configures the selected pin as analog input;
-- reads the 12-bit ADC value;
-- converts it to millivolts using the firmware calibration API;
-- tracks session sample count;
-- tracks session-wide minimum and maximum measured voltage.
+**Límite:** nunca configura el pin como salida ni modifica su nivel lógico.
 
-Risk boundary: the module never configures a pin as output and never writes a digital level.
+## Monitor RSSI Sub-GHz
 
-## Sub-GHz RSSI Monitor
+Evalúa pasivamente la presencia de señales RF con el CC1101 interno.
 
-Purpose: passive RF presence assessment.
+- Usa la configuración RX OOK asíncrona oficial.
+- Permite seleccionar frecuencias admitidas por el hardware.
+- Presenta RSSI actual/máximo y LQI.
+- Registra mínimos y máximos por sesión.
+- Permite fijar el nivel RSSI actual como referencia.
+- Calcula la diferencia en directo e indica cambios mayores de **±12 dB**.
 
-Capabilities:
+El umbral es un indicador de campo sencillo, no un sistema de clasificación RF. **No hay transmisión, reproducción, codificación ni gestión de claves.**
 
-- uses the internal CC1101;
-- loads the official asynchronous OOK RX preset;
-- switches between several common hardware-supported frequencies;
-- reports current RSSI, peak RSSI and LQI;
-- accumulates session RSSI min/max;
-- lets the operator capture the current RSSI as a baseline;
-- displays live delta from baseline;
-- labels a change when delta exceeds ±12 dB.
+## Auditoría Bluetooth
 
-The threshold is a simple field indicator, not an RF classification engine.
+Consulta el estado local del controlador utilizando API HAL públicas:
 
-The module contains no transmit path, encoder, replay or key handling.
+- Controlador disponible.
+- Publicidad o conexión activa.
+- Capacidades GATT/GAP.
+- Indicador de modo de pruebas.
+- RSSI de enlace cuando hay Bluetooth activo.
 
-## Bluetooth Audit
+La API pública de FAP no expone un escáner general de anuncios BLE estable; no se utilizan API internas no documentadas.
 
-Purpose: inspect local Bluetooth controller posture using public HAL APIs.
+## Inspección infrarroja
 
-Capabilities:
+Recibe señales de equipos autorizados, utiliza el decodificador del firmware, identifica protocolos compatibles, presenta dirección/comando y repetición **solo en memoria**, informa de tiempos cuando no hay decodificación y aumenta el contador de señales. **No transmite IR.**
 
-- controller alive state;
-- active advertising/connection state;
-- GATT/GAP capability;
-- test-mode capability flag;
-- link RSSI when Bluetooth is active.
+## Detector NFC
 
-The public FAP API does not currently provide a stable generic BLE advertisement scanner, so the module deliberately avoids private/internal BLE glue APIs.
+Utiliza el escáner \`NfcScanner\` oficial para identificar familias de protocolos; muestra hasta cuatro identificadores detectados y contabiliza eventos durante la sesión. Los datos quedan en RAM.
 
-## Infrared Inspector
+No autentica, emula, escribe ni accede a sectores de aplicación protegidos. El informe exportado incluye únicamente el **contador de detecciones**, nunca UID.
 
-Purpose: inspect IR traffic from equipment you are authorized to test.
+## Lector LF RFID
 
-Capabilities:
+Permite identificar protocolos ASK/PSK de credenciales propias o autorizadas. Muestra un máximo temporal de ocho bytes y contabiliza detecciones.
 
-- receives IR signals;
-- enables firmware signal decoding;
-- identifies supported protocols;
-- displays address, command and repeat state in volatile memory;
-- reports raw timing count for undecoded signals;
-- increments a session-wide signal counter.
+No invoca escritura ni emulación RFID. El informe guarda únicamente el recuento de eventos, no los bytes de la credencial.
 
-No IR transmit function is used.
+## Informe de sesión
 
-## NFC Detector
+La pantalla muestra muestras y rango GPIO, muestras y rango RSSI Sub-GHz, contadores IR/NFC/LF RFID y estado de la última exportación.
 
-Purpose: inventory the protocol family of a presented NFC object.
+Al pulsar **OK** escribe \`last_audit_report.txt\` en el directorio de datos de la aplicación. El archivo sustituye al anterior y contiene solo valores agregados.
 
-Capabilities:
+## Aleatoriedad
 
-- uses the official greedy `NfcScanner`;
-- identifies one or more supported protocols;
-- reports up to four detected protocol identifiers;
-- maintains a session-wide detection-event counter;
-- keeps detected data in RAM.
+El generador de contraseñas y el generador HEX utilizan el RNG de hardware del firmware. La selección de caracteres emplea *rejection sampling* para evitar el sesgo simple de módulo.
 
-It does not read application sectors, authenticate, emulate, write or modify cards.
-
-The exported field report stores only the count of NFC detection events, not UIDs.
-
-## LF RFID Reader
-
-Purpose: identify LF RFID credentials that the operator owns or is authorized to inspect.
-
-Capabilities:
-
-- automatic ASK/PSK read mode;
-- protocol-name identification;
-- bounded volatile preview of up to 8 bytes;
-- session-wide detection-event counter.
-
-The module never calls LF-RFID write or emulation APIs.
-
-The exported field report stores only the number of detection events, not payload bytes.
-
-## Session Report
-
-Purpose: provide one privacy-conscious summary of the current field session.
-
-The screen displays:
-
-- GPIO samples and min/max voltage;
-- Sub-GHz samples and RSSI range;
-- IR signal count;
-- NFC detection-event count;
-- LF RFID detection-event count;
-- last export status.
-
-Pressing **OK** writes `last_audit_report.txt` into the app data directory.
-
-## Randomness utilities
-
-Password and random-HEX tools use the firmware hardware RNG.
-
-Password character selection uses rejection sampling to avoid simple modulo bias.
+© 2026 Fran Gonzas
